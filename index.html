@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hedge Balance</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #181b22;
+      --text: #e6e8ec;
+      --muted: #8a909c;
+      --green: #22c55e;
+      --red: #ef4444;
+      --border: #262a33;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px 16px;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    .sub { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; }
+    .label { color: var(--muted); }
+    .value { font-variant-numeric: tabular-nums; font-weight: 600; }
+    .big { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .green { color: var(--green); }
+    .red { color: var(--red); }
+    .divider { border-top: 1px solid var(--border); margin: 10px 0; }
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .badge {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+    }
+    .badge.buy { background: rgba(34, 197, 94, 0.12); color: var(--green); border-color: rgba(34, 197, 94, 0.4); }
+    .badge.sell { background: rgba(239, 68, 68, 0.12); color: var(--red); border-color: rgba(239, 68, 68, 0.4); }
+    .badge.none { color: var(--muted); }
+    .error { color: var(--red); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Hedge Balance</h1>
+    <div class="sub" id="status">Loading…</div>
+
+    <!-- 1. Total vs initial -->
+    <div class="card">
+      <div class="row">
+        <span class="label">Initial</span>
+        <span class="value" id="initial">—</span>
+      </div>
+      <div class="row">
+        <span class="label">Current (Account 1 + Account 2)</span>
+        <span class="value" id="current">—</span>
+      </div>
+      <div class="divider"></div>
+      <div class="row" style="align-items: baseline;">
+        <span class="label">Gain / Loss</span>
+        <span>
+          <span class="big" id="diff">—</span>
+          <span class="value" id="pct"></span>
+        </span>
+      </div>
+    </div>
+
+    <!-- 2. Open trades -->
+    <div class="card">
+      <div class="label">Open trades</div>
+      <div class="badges" id="trades"></div>
+    </div>
+
+    <!-- Per account -->
+    <div class="card" id="accounts"></div>
+  </div>
+
+  <script>
+    const API_URL = "https://hedge-ak4n.onrender.com/balance";
+    const INITIAL_TOTAL = 200000;
+    const REFRESH_MS = 10000;
+
+    const fmt = (n) =>
+      new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(n);
+
+    const signed = (n) => (n > 0 ? "+" : n < 0 ? "-" : "") + fmt(Math.abs(n));
+
+    const colorClass = (n) => (n > 0 ? "green" : n < 0 ? "red" : "");
+
+    const sideOf = (name) => {
+      if (/\bBUY\b/i.test(name)) return "BUY";
+      if (/\bSELL\b/i.test(name)) return "SELL";
+      return name;
+    };
+
+    function render(accounts) {
+      // 1. Total vs initial
+      const current = accounts.reduce((sum, a) => sum + a.balance, 0);
+      const diff = current - INITIAL_TOTAL;
+      const pct = (diff / INITIAL_TOTAL) * 100;
+
+      document.getElementById("initial").textContent = fmt(INITIAL_TOTAL);
+      document.getElementById("current").textContent = fmt(current);
+
+      const diffEl = document.getElementById("diff");
+      diffEl.textContent = signed(diff);
+      diffEl.className = "big " + colorClass(diff);
+
+      const pctEl = document.getElementById("pct");
+      pctEl.textContent = ` (${diff > 0 ? "+" : ""}${pct.toFixed(4)}%)`;
+      pctEl.className = "value " + colorClass(diff);
+
+      // 2. Open trades (BUY / SELL / both)
+      const open = accounts.filter((a) => a.openTradeCount > 0);
+      const tradesEl = document.getElementById("trades");
+      if (open.length === 0) {
+        tradesEl.innerHTML = `<span class="badge none">No open trades</span>`;
+      } else {
+        const sides = open.map((a) => sideOf(a.name));
+        const summary = sides.includes("BUY") && sides.includes("SELL") ? "Both" : sides.join(", ");
+        tradesEl.innerHTML =
+          `<span class="badge">${summary}</span>` +
+          open
+            .map((a) => {
+              const side = sideOf(a.name);
+              return `<span class="badge ${side.toLowerCase()}">${side} × ${a.openTradeCount}</span>`;
+            })
+            .join("");
+      }
+
+      // Per-account breakdown
+      document.getElementById("accounts").innerHTML = accounts
+        .map(
+          (a, i) => `
+          ${i > 0 ? '<div class="divider"></div>' : ""}
+          <div class="row"><span class="value">${a.name}</span><span class="label">${a.account}</span></div>
+          <div class="row"><span class="label">Balance</span><span class="value">${fmt(a.balance)}</span></div>
+          <div class="row"><span class="label">Unrealized P/L</span><span class="value ${colorClass(a.unrealizedPL)}">${signed(a.unrealizedPL)}</span></div>
+          <div class="row"><span class="label">NAV</span><span class="value">${fmt(a.NAV)}</span></div>
+          <div class="row"><span class="label">Open trades</span><span class="value">${a.openTradeCount}</span></div>
+        `
+        )
+        .join("");
+    }
+
+    async function load() {
+      const statusEl = document.getElementById("status");
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        render(data);
+        statusEl.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+        statusEl.classList.remove("error");
+      } catch (err) {
+        statusEl.textContent = `Failed to load: ${err.message}`;
+        statusEl.classList.add("error");
+      }
+    }
+
+    load();
+    setInterval(load, REFRESH_MS);
+  </script>
+</body>
+</html>
