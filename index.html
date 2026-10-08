@@ -8,10 +8,13 @@
     :root {
       --bg: #0f1115;
       --card: #181b22;
+      --card-2: #1e222b;
       --text: #e6e8ec;
       --muted: #8a909c;
       --green: #22c55e;
       --red: #ef4444;
+      --blue: #60a5fa;
+      --amber: #f59e0b;
       --border: #262a33;
     }
     * { box-sizing: border-box; }
@@ -20,78 +23,204 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
-      padding: 24px 16px;
+      padding: 24px 16px 48px;
     }
-    .wrap { max-width: 720px; margin: 0 auto; }
-    h1 { font-size: 20px; margin: 0 0 4px; }
-    .sub { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+    .wrap { max-width: 1100px; margin: 0 auto; }
+
+    /* Header */
+    header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    h1 { font-size: 20px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; }
+    .error { color: var(--red); }
+    .ranges { display: flex; gap: 4px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 3px; }
+    .ranges button {
+      background: transparent;
+      color: var(--muted);
+      border: 0;
+      border-radius: 7px;
+      padding: 6px 14px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .ranges button.active { background: var(--card-2); color: var(--text); }
+
+    /* Cards */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 20px;
       margin-bottom: 16px;
+      min-width: 0;
     }
-    .row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; }
+    .card-title { color: var(--muted); font-size: 13px; font-weight: 600; margin-bottom: 12px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
     .label { color: var(--muted); }
     .value { font-variant-numeric: tabular-nums; font-weight: 600; }
-    .big { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
     .green { color: var(--green); }
     .red { color: var(--red); }
-    .divider { border-top: 1px solid var(--border); margin: 10px 0; }
-    .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+
+    /* Summary (top) */
+    .summary { display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 20px; }
+    .total .big { font-size: 34px; font-weight: 700; font-variant-numeric: tabular-nums; margin: 4px 0; letter-spacing: -0.5px; }
+    .total .gain { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .total .initial { margin-top: 6px; font-size: 13px; }
+    .acct { border-left: 1px solid var(--border); padding-left: 20px; }
+    .acct-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .acct-id { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .row { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; font-size: 14px; }
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
     .badge {
-      padding: 6px 12px;
+      padding: 4px 10px;
       border-radius: 999px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       border: 1px solid var(--border);
+      white-space: nowrap;
     }
     .badge.buy { background: rgba(34, 197, 94, 0.12); color: var(--green); border-color: rgba(34, 197, 94, 0.4); }
     .badge.sell { background: rgba(239, 68, 68, 0.12); color: var(--red); border-color: rgba(239, 68, 68, 0.4); }
     .badge.none { color: var(--muted); }
-    .error { color: var(--red); }
+
+    /* KPI tiles */
+    .tiles { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 16px; }
+    .tile { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; min-width: 0; }
+    .tile .label { font-size: 12px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tile .value { display: block; margin-top: 4px; font-size: 17px; }
+
+    /* Charts */
+    .chart { position: relative; height: 260px; }
+    .chart.small { height: 200px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .grid-3 .card { margin-bottom: 16px; }
+    .legend { display: flex; gap: 12px; font-weight: 500; }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+    th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    th { color: var(--muted); font-weight: 500; font-size: 12px; }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: var(--card-2); }
+    td.num, th.num { text-align: right; }
+    .pill { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+    .pill.tp { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+    .pill.sl { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+    .pill.other { background: var(--card-2); color: var(--muted); }
+    .empty { color: var(--muted); font-size: 13px; }
+
+    /* Tablet */
+    @media (max-width: 900px) {
+      .summary { grid-template-columns: 1fr 1fr; }
+      .total { grid-column: 1 / -1; }
+      #acct-0 { border-left: 0; padding-left: 0; }
+      .tiles { grid-template-columns: repeat(3, 1fr); }
+      .grid-3 { grid-template-columns: 1fr; gap: 0; }
+    }
+
+    /* Phone: tables become cards */
+    @media (max-width: 640px) {
+      body { padding: 16px 12px 40px; }
+      .card { padding: 16px; }
+      .summary { grid-template-columns: 1fr; gap: 16px; }
+      .acct { border-left: 0; padding-left: 0; border-top: 1px solid var(--border); padding-top: 14px; }
+      .total .big { font-size: 30px; }
+      .tiles { grid-template-columns: repeat(2, 1fr); }
+      .chart { height: 220px; }
+      .chart.small { height: 180px; }
+
+      table.cards thead { display: none; }
+      table.cards tr { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 16px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+      table.cards tr:last-child { border-bottom: 0; }
+      table.cards tbody tr:hover { background: transparent; }
+      table.cards td { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; border: 0; }
+      table.cards td::before { content: attr(data-label); color: var(--muted); font-size: 12px; }
+    }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
   <div class="wrap">
-    <h1>Hedge Balance</h1>
-    <div class="sub" id="status">Loading…</div>
+    <header>
+      <div>
+        <h1>Hedge Balance</h1>
+        <div class="sub" id="status">Loading…</div>
+      </div>
+      <div class="ranges" id="ranges">
+        <button data-days="1">1D</button>
+        <button data-days="7" class="active">7D</button>
+        <button data-days="30">30D</button>
+      </div>
+    </header>
 
-    <!-- 1. Total vs initial -->
+    <!-- 1. Balance summary -->
     <div class="card">
-      <div class="row">
-        <span class="label">Initial</span>
-        <span class="value" id="initial">—</span>
+      <div class="summary">
+        <div class="total">
+          <div class="label">Current (Account 1 + Account 2)</div>
+          <div class="big" id="current">—</div>
+          <div><span class="gain" id="diff">—</span> <span class="value" id="pct"></span></div>
+          <div class="initial label">Initial <span id="initial">—</span></div>
+          <div class="badges" id="trades"></div>
+        </div>
+        <div class="acct" id="acct-0"></div>
+        <div class="acct" id="acct-1"></div>
       </div>
-      <div class="row">
-        <span class="label">Current (Account 1 + Account 2)</span>
-        <span class="value" id="current">—</span>
-      </div>
-      <div class="divider"></div>
-      <div class="row" style="align-items: baseline;">
-        <span class="label">Gain / Loss</span>
-        <span>
-          <span class="big" id="diff">—</span>
-          <span class="value" id="pct"></span>
+    </div>
+
+    <!-- 2. KPIs -->
+    <div class="sub" id="stats-status" style="margin: 0 0 8px 2px;"></div>
+    <div class="tiles" id="tiles"></div>
+
+    <!-- 3. Trends -->
+    <div class="card">
+      <div class="card-title">
+        <span>Cumulative realized P/L</span>
+        <span class="legend">
+          <span><span class="dot" style="background: var(--text)"></span>Combined</span>
+          <span><span class="dot" style="background: var(--green)"></span>BUY</span>
+          <span><span class="dot" style="background: var(--red)"></span>SELL</span>
         </span>
       </div>
+      <div class="chart"><canvas id="chart-cum"></canvas></div>
     </div>
 
-    <!-- 2. Open trades -->
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">Daily P/L</div>
+        <div class="chart small"><canvas id="chart-daily"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Total NAV</div>
+        <div class="chart small"><canvas id="chart-equity"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">XAU/USD (mid)</div>
+        <div class="chart small"><canvas id="chart-price"></canvas></div>
+      </div>
+    </div>
+
+    <!-- 4. Tables -->
     <div class="card">
-      <div class="label">Open trades</div>
-      <div class="badges" id="trades"></div>
+      <div class="card-title">Open trades</div>
+      <div id="open-details"></div>
     </div>
 
-    <!-- Per account -->
-    <div class="card" id="accounts"></div>
+    <div class="card">
+      <div class="card-title"><span>Recent closed trades</span><span id="recent-count"></span></div>
+      <div id="recent"></div>
+    </div>
   </div>
 
   <script>
-    const API_URL = "https://hedge-ak4n.onrender.com/balance";
+    // Base URL from ?url=https://your-server (falls back to the Render deploy)
+    const BASE_URL = (new URLSearchParams(location.search).get("url") || "https://hedge-ak4n.onrender.com").replace(/\/+$/, "");
+    const API_URL = `${BASE_URL}/balance`;
+    const STATS_URL = `${BASE_URL}/stats`;
     const INITIAL_TOTAL = 200000;
     const REFRESH_MS = 10000;
+    const RECENT_LIMIT = 20;
 
     const fmt = (n) =>
       new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(n);
@@ -100,14 +229,17 @@
 
     const colorClass = (n) => (n > 0 ? "green" : n < 0 ? "red" : "");
 
+    const num = (n, d = 2) => (n === null || n === undefined || Number.isNaN(n) ? "—" : Number(n).toFixed(d));
+
     const sideOf = (name) => {
       if (/\bBUY\b/i.test(name)) return "BUY";
       if (/\bSELL\b/i.test(name)) return "SELL";
       return name;
     };
 
+    // ---------- Balance summary (/balance) ----------
+
     function render(accounts) {
-      // 1. Total vs initial
       const current = accounts.reduce((sum, a) => sum + a.balance, 0);
       const diff = current - INITIAL_TOTAL;
       const pct = (diff / INITIAL_TOTAL) * 100;
@@ -117,20 +249,20 @@
 
       const diffEl = document.getElementById("diff");
       diffEl.textContent = signed(diff);
-      diffEl.className = "big " + colorClass(diff);
+      diffEl.className = "gain " + colorClass(diff);
 
       const pctEl = document.getElementById("pct");
-      pctEl.textContent = ` (${diff > 0 ? "+" : ""}${pct.toFixed(4)}%)`;
+      pctEl.textContent = `(${diff > 0 ? "+" : ""}${pct.toFixed(4)}%)`;
       pctEl.className = "value " + colorClass(diff);
 
-      // 2. Open trades (BUY / SELL / both)
+      // Open trades (BUY / SELL / both)
       const open = accounts.filter((a) => a.openTradeCount > 0);
       const tradesEl = document.getElementById("trades");
       if (open.length === 0) {
         tradesEl.innerHTML = `<span class="badge none">No open trades</span>`;
       } else {
         const sides = open.map((a) => sideOf(a.name));
-        const summary = sides.includes("BUY") && sides.includes("SELL") ? "Both" : sides.join(", ");
+        const summary = sides.includes("BUY") && sides.includes("SELL") ? "Both open" : `${sides.join(", ")} open`;
         tradesEl.innerHTML =
           `<span class="badge">${summary}</span>` +
           open
@@ -141,19 +273,21 @@
             .join("");
       }
 
-      // Per-account breakdown
-      document.getElementById("accounts").innerHTML = accounts
-        .map(
-          (a, i) => `
-          ${i > 0 ? '<div class="divider"></div>' : ""}
-          <div class="row"><span class="value">${a.name}</span><span class="label">${a.account}</span></div>
+      // Per-account
+      accounts.slice(0, 2).forEach((a, i) => {
+        const side = sideOf(a.name);
+        document.getElementById(`acct-${i}`).innerHTML = `
+          <div class="acct-head">
+            <span class="badge ${side.toLowerCase()}">${side}</span>
+            <span class="value">${a.name.replace(/\s*\(.*\)/, "")}</span>
+          </div>
+          <div class="acct-id">${a.account}</div>
           <div class="row"><span class="label">Balance</span><span class="value">${fmt(a.balance)}</span></div>
           <div class="row"><span class="label">Unrealized P/L</span><span class="value ${colorClass(a.unrealizedPL)}">${signed(a.unrealizedPL)}</span></div>
           <div class="row"><span class="label">NAV</span><span class="value">${fmt(a.NAV)}</span></div>
           <div class="row"><span class="label">Open trades</span><span class="value">${a.openTradeCount}</span></div>
-        `
-        )
-        .join("");
+        `;
+      });
     }
 
     async function load() {
@@ -173,6 +307,217 @@
 
     load();
     setInterval(load, REFRESH_MS);
+
+    // ---------- Trends + tables (/stats) ----------
+
+    let statsDays = 7;
+    const charts = {};
+
+    const shortTime = (iso, days) =>
+      new Date(iso).toLocaleString(
+        "en-AU",
+        days > 1 ? { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" } : { hour: "2-digit", minute: "2-digit" }
+      );
+
+    Chart.defaults.color = "#8a909c";
+    Chart.defaults.borderColor = "#262a33";
+    Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+
+    function drawChart(id, type, labels, datasets) {
+      if (charts[id]) {
+        charts[id].data.labels = labels;
+        charts[id].data.datasets = datasets;
+        charts[id].update("none");
+        return;
+      }
+      charts[id] = new Chart(document.getElementById(id), {
+        type,
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          interaction: { mode: "index", intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: { backgroundColor: "#0f1115", borderColor: "#262a33", borderWidth: 1, padding: 10 },
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { maxTicksLimit: 5, maxRotation: 0, autoSkipPadding: 12 } },
+            y: { ticks: { maxTicksLimit: 5 } },
+          },
+        },
+      });
+    }
+
+    const line = (label, data, color, extra = {}) => ({
+      label,
+      data,
+      borderColor: color,
+      backgroundColor: color,
+      borderWidth: 2,
+      pointRadius: data.length < 3 ? 3 : 0, // single points are invisible without a dot
+      tension: 0.2,
+      spanGaps: true,
+      ...extra,
+    });
+
+    const tile = (label, value, cls = "") =>
+      `<div class="tile"><span class="label">${label}</span><span class="value ${cls}">${value}</span></div>`;
+
+    const reasonPill = (r) => `<span class="pill ${r === "TP" ? "tp" : r === "SL" ? "sl" : "other"}">${r ?? "—"}</span>`;
+
+    // Table that collapses into cards on phones; cols: [header, cellFn(row) -> html, class]
+    function table(rows, cols) {
+      return `<table class="cards">
+        <thead><tr>${cols.map(([h, , cls = ""]) => `<th class="${cls}">${h}</th>`).join("")}</tr></thead>
+        <tbody>${rows
+          .map(
+            (r) =>
+              `<tr>${cols
+                .map(([h, cell, cls = ""]) => `<td class="${cls}" data-label="${h}">${cell(r)}</td>`)
+                .join("")}</tr>`
+          )
+          .join("")}</tbody>
+      </table>`;
+    }
+
+    function renderStats(s) {
+      const days = s.range.days;
+      const all = s.summary.all;
+
+      // KPI tiles
+      const acc = Object.fromEntries(s.summary.byAccount.map((a) => [sideOf(a.accountLabel), a]));
+      document.getElementById("tiles").innerHTML = all
+        ? [
+            tile("Realized P/L", signed(all.totalPL), colorClass(all.totalPL)),
+            tile("Win rate", `${num(all.winRate, 1)}%`),
+            tile("Trades · TP / SL", `${all.trades} · ${all.tpHits} / ${all.slHits}`),
+            tile("Profit factor", num(all.profitFactor, 2), all.profitFactor >= 1 ? "green" : "red"),
+            tile("BUY P/L", acc.BUY ? signed(acc.BUY.totalPL) : "—", colorClass(acc.BUY?.totalPL)),
+            tile("SELL P/L", acc.SELL ? signed(acc.SELL.totalPL) : "—", colorClass(acc.SELL?.totalPL)),
+            tile("Avg P/L / trade", signed(all.avgPL), colorClass(all.avgPL)),
+            tile("Best trade", signed(all.bestTradePL), colorClass(all.bestTradePL)),
+            tile("Worst trade", signed(all.worstTradePL), colorClass(all.worstTradePL)),
+            tile("Max profit seen", signed(all.highestProfitSeen), colorClass(all.highestProfitSeen)),
+            tile("Max loss seen", signed(all.deepestLossSeen), colorClass(all.deepestLossSeen)),
+            tile("Avg duration · spread", `${num(all.avgDurationMinutes, 0)}m · ${num(all.avgOpenSpread, 2)}`),
+          ].join("")
+        : `<div class="tile" style="grid-column: 1 / -1"><span class="label">No closed trades in this range</span></div>`;
+
+      // Cumulative P/L: combined + each account (carried forward between its own closes)
+      const cum = s.trend.cumulativePL;
+      const labelOf = Object.fromEntries(s.summary.byAccount.map((a) => [a.account, sideOf(a.accountLabel)]));
+      const accountIds = [...new Set(cum.map((p) => p.account))];
+      const running = {};
+      const perAccount = Object.fromEntries(accountIds.map((id) => [id, []]));
+      cum.forEach((p) => {
+        running[p.account] = p.accountCumulativePL;
+        accountIds.forEach((id) => perAccount[id].push(running[id] ?? 0));
+      });
+      drawChart(
+        "chart-cum",
+        "line",
+        cum.map((p) => shortTime(p.time, days)),
+        [
+          line("Combined", cum.map((p) => p.cumulativePL), "#e6e8ec", {
+            fill: { target: "origin", above: "rgba(34,197,94,0.08)", below: "rgba(239,68,68,0.08)" },
+          }),
+          ...accountIds.map((id) =>
+            line(labelOf[id] || id, perAccount[id], labelOf[id] === "SELL" ? "#ef4444" : "#22c55e", { borderWidth: 1.5 })
+          ),
+        ]
+      );
+
+      // Daily P/L bars
+      const daily = s.trend.dailyPL;
+      drawChart("chart-daily", "bar", daily.map((d) => d.date.slice(5)), [
+        {
+          label: "P/L",
+          data: daily.map((d) => d.realizedPL),
+          backgroundColor: daily.map((d) => (d.realizedPL >= 0 ? "rgba(34,197,94,0.75)" : "rgba(239,68,68,0.75)")),
+          borderRadius: 4,
+          maxBarThickness: 36,
+        },
+      ]);
+
+      // Total NAV: sum of both accounts per bucket, carrying each account's last NAV forward
+      const lastNav = {};
+      const navByTime = new Map();
+      s.trend.equity.forEach((e) => {
+        lastNav[e.account] = e.NAV;
+        navByTime.set(e.time, Object.values(lastNav).reduce((a, b) => a + b, 0));
+      });
+      drawChart("chart-equity", "line", [...navByTime.keys()].map((t) => shortTime(t, days)), [
+        line("NAV", [...navByTime.values()], "#60a5fa"),
+      ]);
+
+      // Price
+      drawChart("chart-price", "line", s.trend.price.map((p) => shortTime(p.time, days)), [
+        line("Mid", s.trend.price.map((p) => p.close), "#f59e0b"),
+      ]);
+
+      // Open trades
+      const sideCell = (t) => `<span class="badge ${t.side.toLowerCase()}">${t.side}</span>`;
+      const open = s.current.openTrades;
+      document.getElementById("open-details").innerHTML = open.length
+        ? table(open, [
+            ["Side", sideCell],
+            ["Entry", (t) => num(t.openPrice, 3), "num"],
+            ["SL", (t) => num(t.stopLoss, 3), "num"],
+            ["TP", (t) => num(t.takeProfit, 3), "num"],
+            ["Now", (t) => num(t.lastExitPrice, 3), "num"],
+            ["P/L", (t) => `<span class="value ${colorClass(t.lastUnrealizedPL)}">${num(t.lastUnrealizedPL)}</span>`, "num"],
+            ["Max profit", (t) => num(t.maxProfit), "num"],
+            ["Max loss", (t) => num(t.maxLoss), "num"],
+            ["Opened", (t) => shortTime(t.openTime, 2)],
+          ])
+        : `<div class="empty">No open trades</div>`;
+
+      // Recent closed trades
+      const recent = s.trades.slice(0, RECENT_LIMIT);
+      document.getElementById("recent-count").textContent = s.trades.length
+        ? `${recent.length} of ${s.trades.length}`
+        : "";
+      document.getElementById("recent").innerHTML = recent.length
+        ? table(recent, [
+            ["Closed", (t) => shortTime(t.closeTime, 2)],
+            ["Side", sideCell],
+            ["Hit", (t) => reasonPill(t.closeReason)],
+            ["P/L", (t) => `<span class="value ${colorClass(t.realizedPL)}">${num(t.realizedPL)}</span>`, "num"],
+            ["Entry", (t) => num(t.openPrice, 3), "num"],
+            ["Exit", (t) => num(t.closePrice, 3), "num"],
+            ["Max profit", (t) => num(t.maxProfit), "num"],
+            ["Max loss", (t) => num(t.maxLoss), "num"],
+            ["Duration", (t) => `${num(t.durationSeconds / 60, 0)}m`, "num"],
+          ])
+        : `<div class="empty">No closed trades in this range</div>`;
+    }
+
+    async function loadStats() {
+      const statusEl = document.getElementById("stats-status");
+      try {
+        const res = await fetch(`${STATS_URL}?days=${statsDays}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        renderStats(await res.json());
+        statusEl.textContent = `Last ${statsDays === 1 ? "24 hours" : `${statsDays} days`}`;
+        statusEl.classList.remove("error");
+      } catch (err) {
+        statusEl.textContent = `Failed to load stats: ${err.message}`;
+        statusEl.classList.add("error");
+      }
+    }
+
+    document.getElementById("ranges").addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      statsDays = Number(btn.dataset.days);
+      document.querySelectorAll("#ranges button").forEach((b) => b.classList.toggle("active", b === btn));
+      loadStats();
+    });
+
+    loadStats();
+    setInterval(loadStats, REFRESH_MS);
   </script>
 </body>
 </html>
